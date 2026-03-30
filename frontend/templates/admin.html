@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ru" style="color-scheme: light only;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>ЛогоперРадар — Панель управления</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light only;
+    --bg:           #eef0f4;
+    --surface:      #ffffff;
+    --surface2:     #f5f6f8;
+    --border:       #e2e5ea;
+    --border2:      #cbd0d8;
+    --accent:       #1d6ff0;
+    --accent-bg:    #e8f0fe;
+    --green:        #17a262;
+    --green-bg:     #e8f6ef;
+    --green-border: #b0dfc6;
+    --danger:       #d93025;
+    --danger-bg:    #fdf0ef;
+    --danger-border:#f5c5c2;
+    --text:         #111827;
+    --text-mid:     #6b7280;
+    --text-dim:     #b0b8c4;
+    --header:       #0f1c33;
+    --radius:       10px;
+    --radius-lg:    14px;
+    --shadow-xs:    0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm:    0 2px 8px rgba(0,0,0,.08);
+    --shadow-lg:    0 20px 48px rgba(0,0,0,.14),0 4px 12px rgba(0,0,0,.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, input, button, select, textarea {
+    color-scheme: light only; background-color: initial; color: initial;
+  }
+  body { background: var(--bg) !important; color: var(--text) !important; font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  /* ══ HEADER ══ */
+  header {
+    width: 100%; background: var(--header) !important;
+    padding: 0 40px; height: 66px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,.22);
+  }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(140deg,#2d8cf0,#1350b4);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-title { font-size: 17px; font-weight: 700; color: #fff !important; letter-spacing: -.3px; line-height: 1.15; }
+  .logo-sub { font-size: 11px; color: rgba(255,255,255,.4) !important; font-family: 'JetBrains Mono', monospace; letter-spacing: .3px; display: block; }
+  .header-right { display: flex; align-items: center; gap: 18px; }
+  .hdr-divider { width: 1px; height: 26px; background: rgba(255,255,255,.12); flex-shrink: 0; }
+  .hdr-time .hdr-date { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: #5aaff5 !important; letter-spacing: .4px; }
+  .hdr-time .hdr-label { font-size: 10px; color: rgba(255,255,255,.35) !important; margin-top: 1px; letter-spacing: .2px; }
+  .live-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,.35) !important; letter-spacing: .5px; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+  .btn-logout {
+    display: flex; align-items: center; gap: 7px; padding: 7px 15px;
+    background: rgba(255,255,255,.07) !important; border: 1px solid rgba(255,255,255,.14);
+    border-radius: var(--radius); color: rgba(255,255,255,.6) !important;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .18s;
+  }
+  .btn-logout:hover { background: rgba(217,48,37,.2) !important; border-color: rgba(217,48,37,.45); color: #ff8a80 !important; }
+
+  /* ══ MAIN ══ */
+  main { padding: 30px 40px; max-width: 1200px; margin: 0 auto; }
+
+  /* STAT CARDS */
+  .stats-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface) !important; border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 18px 16px 14px;
+    cursor: pointer; box-shadow: var(--shadow-xs); transition: all .18s;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::after {
+    content:''; position:absolute; bottom:0; left:14px; right:14px;
+    height:2px; background:var(--accent); border-radius:2px 2px 0 0;
+    opacity:.3; transition: opacity .18s, left .18s, right .18s;
+  }
+  .stat-card:hover { border-color:var(--border2); box-shadow:var(--shadow-sm); transform:translateY(-2px); }
+  .stat-card:hover::after { opacity:.85; left:0; right:0; }
+  .stat-card.active { border-color: var(--accent); background: var(--accent-bg) !important; }
+  .stat-card.active::after { opacity:1; left:0; right:0; }
+  .stat-num { font-size: 36px; font-weight: 700; color: var(--accent) !important; line-height: 1; letter-spacing: -1.5px; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .stat-lbl { font-size: 11px; font-weight: 500; color: var(--text-mid) !important; margin-bottom: 10px; }
+  .stat-bar-track { height: 3px; border-radius: 99px; background: var(--border); overflow: hidden; }
+  .stat-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), #5aaff5); transition: width .4s ease; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 10px; align-items: stretch; margin-bottom: 18px; flex-wrap: wrap; }
+
+  .search-box {
+    flex: 1; min-width: 260px;
+    display: flex; align-items: stretch;
+    background: var(--surface) !important; border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-xs); overflow: hidden;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,111,240,.1); }
+  .search-ico { display: flex; align-items: center; padding: 0 13px; color: var(--text-dim) !important; flex-shrink: 0; }
+  .search-inp {
+    flex: 1; border: none; outline: none;
+    background: transparent !important; color: var(--text) !important;
+    font-family: 'Inter', sans-serif; font-size: 14px; padding: 12px 4px;
+  }
+  .search-inp::placeholder { color: var(--text-dim) !important; }
+
+  .btn-attach-search {
+    display: flex; align-items: center; justify-content: center;
+    width: 42px; flex-shrink: 0;
+    background: var(--surface2) !important; border: none;
+    border-left: 1px solid var(--border); color: var(--text-mid) !important;
+    cursor: pointer; transition: background .15s, color .15s;
+  }
+  .btn-attach-search:hover { background: var(--accent-bg) !important; color: var(--accent) !important; }
+  .file-inp { display: none; }
+
+  /* Buttons */
+  .btn { display: flex; align-items: center; gap: 7px; padding: 0 16px; height: 42px; border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .18s; white-space: nowrap; border: 1px solid transparent; }
+  .btn-export { background: var(--green-bg) !important; border-color: var(--green-border); color: var(--green) !important; }
+  .btn-export:hover { background: #d4f0e4 !important; }
+  .btn-refresh { background: #111827 !important; color: #fff !important; border-color: transparent; }
+  .btn-refresh:hover { background: #1d2d45 !important; }
+  .btn-refresh:disabled { opacity:.6; cursor:default; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin .65s linear infinite; }
+
+  /* Delete split button */
+  .delete-split { display: flex; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--danger-border); flex-shrink: 0; }
+  .delete-split-main {
+    display: flex; align-items: center; gap: 7px;
+    padding: 0 14px; height: 42px;
+    background: var(--danger-bg) !important; color: var(--danger) !important;
+    border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background .15s; white-space: nowrap;
+  }
+  .delete-split-main:hover { background: #fce4e2 !important; }
+  .delete-split-attach {
+    display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 42px;
+    background: var(--danger-bg) !important; color: var(--danger) !important;
+    border: none; border-left: 1px solid var(--danger-border);
+    cursor: pointer; transition: background .15s;
+  }
+  .delete-split-attach:hover { background: #fce4e2 !important; }
+
+  /* TABLE */
+  .tbl-wrap { background: var(--surface) !important; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-xs); }
+  .tbl-head {
+    display: grid; grid-template-columns: 1fr 160px 120px 180px 44px;
+    padding: 0 18px; background: var(--surface2) !important;
+    border-bottom: 1px solid var(--border);
+  }
+  .th { padding: 11px 8px; font-size: 10px; font-weight: 700; color: var(--text-dim) !important; letter-spacing: .8px; text-transform: uppercase; }
+  .tbl-row {
+    display: grid; grid-template-columns: 1fr 160px 120px 180px 44px;
+    padding: 0 18px; border-bottom: 1px solid var(--border);
+    align-items: center; transition: background .14s;
+  }
+  .tbl-row:last-child { border-bottom: none; }
+  .tbl-row:hover { background: var(--surface2) !important; }
+  .tbl-row > div { padding: 14px 8px; }
+  .ship-name { font-size: 14px; font-weight: 600; color: var(--text) !important; }
+  .imo-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-mid) !important; }
+
+  /* Line badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+  }
+  .badge::before { content:'•'; font-size:14px; line-height:1; }
+  .badge-transit { background:#f0f4ff; color:#4477cc; }
+  .badge-reg     { background:var(--green-bg); color:var(--green); }
+  .badge-fesco   { background:#e8f6ef; color:#1a8c5a; }
+  .badge-default { background:var(--surface2); color:var(--text-mid); }
+
+  /* Basin dot */
+  .basin-dot {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500; color: var(--text) !important;
+  }
+  .basin-dot::before {
+    content:'•'; font-size:16px; line-height:1;
+  }
+  .basin-dv       .basin-dot::before, .basin-dot.dv::before       { color:#1d6ff0; }
+  .basin-dv-kab   .basin-dot::before, .basin-dot.dv-kab::before   { color:#0ea5e9; }
+  .basin-dv-norf  .basin-dot::before, .basin-dot.dv-norf::before  { color:#6366f1; }
+  .basin-blt      .basin-dot::before, .basin-dot.blt::before      { color:#17a262; }
+  .basin-blt-kab  .basin-dot::before, .basin-dot.blt-kab::before  { color:#10b981; }
+  .basin-nvr      .basin-dot::before, .basin-dot.nvr::before      { color:#f59e0b; }
+  .basin-transit  .basin-dot::before, .basin-dot.transit::before  { color:#9ca3af; }
+  .basin-unknown  .basin-dot::before, .basin-dot.unknown::before  { color:#d1d5db; }
+
+  .btn-del-row {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 7px;
+    background: var(--danger-bg) !important; border: 1px solid var(--danger-border);
+    color: var(--danger) !important; font-size: 16px; cursor: pointer;
+    transition: background .15s; line-height: 1;
+  }
+  .btn-del-row:hover { background: #fce4e2 !important; }
+
+  /* Refresh indicator */
+  .btn-refresh-row {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 7px;
+    background: var(--accent-bg) !important; border: 1px solid rgba(29,111,240,.2);
+    color: var(--accent) !important; cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-refresh-row:hover { background: #d0e3ff !important; }
+
+  /* Status toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 300;
+    background: #111827 !important; color: #fff !important;
+    padding: 12px 18px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(20px); opacity: 0;
+    transition: all .28s; pointer-events: none;
+  }
+  .toast.show { transform: none; opacity: 1; }
+  .toast.error { background: var(--danger) !important; }
+  .toast.success { background: var(--green) !important; }
+
+  /* Loading row */
+  .loading-row { padding: 28px 18px; text-align: center; color: var(--text-dim) !important; font-size: 13px; }
+  .no-data { padding: 18px 26px; font-size: 13px; color: var(--text-dim) !important; font-style: italic; border-top: 1px solid var(--border); }
+
+  /* Updating overlay on table */
+  .tbl-updating { opacity: 0.5; pointer-events: none; transition: opacity .3s; }
+
+  /* POPUP (delete confirm) */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; z-index: 200;
+    opacity: 0; pointer-events: none; transition: opacity .22s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .popup {
+    background: var(--surface) !important; border-radius: var(--radius-lg);
+    padding: 32px 36px; width: 420px; box-shadow: var(--shadow-lg); position: relative;
+    transform: translateY(16px) scale(.97); transition: transform .22s, opacity .22s; opacity: 0;
+  }
+  .overlay.open .popup { transform: none; opacity: 1; }
+  .popup-x { position:absolute; top:14px; right:16px; background:none; border:none; color:var(--text-dim) !important; font-size:20px; cursor:pointer; line-height:1; padding:4px; }
+  .popup-x:hover { color:var(--text) !important; }
+  .popup-icon-wrap { width:52px; height:52px; border-radius:14px; background:var(--danger-bg); border:1px solid var(--danger-border); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+  .popup h2 { font-size:17px; font-weight:700; color:var(--text) !important; margin-bottom:8px; }
+  .popup p { font-size:13px; color:var(--text-mid) !important; line-height:1.55; margin-bottom:20px; }
+  .popup-lbl { font-size:12px; font-weight:600; color:var(--text-mid) !important; margin-bottom:6px; letter-spacing:.3px; text-transform:uppercase; }
+  .popup-inp {
+    width:100%; padding:11px 14px; font-size:14px;
+    border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--surface2) !important; color:var(--text) !important;
+    font-family:'Inter',sans-serif; outline:none; transition:border-color .18s,box-shadow .18s;
+  }
+  .popup-inp:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(29,111,240,.12); }
+  .popup-inp.valid { border-color:var(--green); box-shadow:0 0 0 3px rgba(23,162,98,.12); }
+  .popup-ok { display:none; font-size:12px; color:var(--green) !important; margin-top:8px; align-items:center; gap:5px; }
+  .popup-ok.show { display:flex; }
+  .popup-spacer { height:24px; }
+  .popup-actions { display:flex; gap:10px; }
+  .btn-cancel { flex:1; height:40px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface) !important; color:var(--text-mid) !important; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:background .15s; }
+  .btn-cancel:hover { background:var(--surface2) !important; }
+  .btn-do-delete { flex:2; height:40px; display:flex; align-items:center; justify-content:center; gap:7px; border:none; border-radius:var(--radius); background:var(--border) !important; color:var(--text-dim) !important; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:default; transition:all .18s; }
+  .btn-do-delete.on { background:var(--danger) !important; color:#fff !important; cursor:pointer; }
+
+  /* Add vessel inline */
+  .add-row {
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 18px; border-top: 1px solid var(--border);
+    background: var(--surface2) !important;
+  }
+  .add-inp {
+    flex: 1; max-width: 200px; padding: 8px 12px; font-size: 13px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface) !important; color: var(--text) !important;
+    font-family: 'JetBrains Mono', monospace; outline: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .add-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,111,240,.1); }
+  .add-inp::placeholder { color: var(--text-dim) !important; font-family: 'Inter', sans-serif; }
+  .btn-add {
+    padding: 8px 14px; background: var(--accent) !important; color: #fff !important;
+    border: none; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer; transition: background .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-add:hover { background: #1558c8 !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <polygon points="10,2 18,7 18,13 10,18 2,13 2,7" stroke="white" stroke-width="1.5" fill="none"/>
+        <circle cx="10" cy="10" r="2.5" fill="white"/>
+        <line x1="10" y1="2" x2="10" y2="7" stroke="white" stroke-width="1.2"/>
+        <line x1="10" y1="13" x2="10" y2="18" stroke="white" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-title">ЛогоперРадар</div>
+      <span class="logo-sub">FLEET TRACKING SYSTEM</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+    <div class="hdr-divider"></div>
+    <div class="hdr-time">
+      <div class="hdr-date" id="clock">—</div>
+      <div class="hdr-label">последнее обновление</div>
+    </div>
+    <div class="hdr-divider"></div>
+    <button class="btn-logout" onclick="doLogout()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M5 2H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2M9 10l3-3-3-3M12 7H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Выйти
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid">
+    {% for s in stats %}
+    {% if s.count > 0 %}
+    <div class="stat-card" onclick="filterBasin('{{ s.basin }}')" data-basin="{{ s.basin }}">
+      <div class="stat-num">{{ s.count }}</div>
+      <div class="stat-lbl">{{ s.basin }}</div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:{{ s.pct }}%"></div></div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <div class="search-ico">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M10.5 10.5 13.5 13.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <input class="search-inp" type="text" id="search-inp" placeholder="Введите IMO код или прикрепите список TXT..." oninput="applySearch()">
+      <input type="file" accept=".txt" class="file-inp" id="f-import">
+      <button class="btn-attach-search" onclick="document.getElementById('f-import').click()" title="Прикрепить TXT со списком IMO">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M13.5 7.5L7.5 13.5C6 15 3.5 15 2 13.5C0.5 12 0.5 9.5 2 8L8.5 1.5C9.5 0.5 11 0.5 12 1.5C13 2.5 13 4 12 5L5.5 11.5C5 12 4 12 3.5 11.5C3 11 3 10 3.5 9.5L9.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <button class="btn btn-export" onclick="exportXls()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 9.5V2M4 6.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 11.5h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Экспорт XLS
+    </button>
+
+    <button class="btn btn-refresh" id="btn-refresh" onclick="doRefreshAll()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" id="ico-refresh">
+        <path d="M12 7A5 5 0 1 1 7 2" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M7 2 9 0M7 2 9 4" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Обновить
+    </button>
+
+    <div class="delete-split">
+      <button class="delete-split-main" onclick="openDeletePopup(null)">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 4h10M5 4V3a1 1 0 0 1 2 0v1M5.5 7v3M8.5 7v3M3.5 4 4 11.5A1 1 0 0 0 5 12.5h4a1 1 0 0 0 1-.9L10.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Массовое удаление
+      </button>
+      <input type="file" accept=".txt" class="file-inp" id="f-delete">
+      <button class="delete-split-attach" onclick="document.getElementById('f-delete').click()" title="Удалить по TXT списку">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M13.5 7.5L7.5 13.5C6 15 3.5 15 2 13.5C0.5 12 0.5 9.5 2 8L8.5 1.5C9.5 0.5 11 0.5 12 1.5C13 2.5 13 4 12 5L5.5 11.5C5 12 4 12 3.5 11.5C3 11 3 10 3.5 9.5L9.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="tbl-wrap" id="tbl-wrap">
+    <div class="tbl-head">
+      <div class="th">Название судна</div>
+      <div class="th">Линия</div>
+      <div class="th">IMO</div>
+      <div class="th">Бассейн</div>
+      <div class="th"></div>
+    </div>
+    <div id="tbl-body">
+      {% if vessels %}
+        {% for v in vessels %}
+        <div class="tbl-row" data-imo="{{ v.imo }}" data-basin="{{ v.basin }}">
+          <div class="ship-name">{{ v.name or v.imo }}</div>
+          <div>{{ v.line | lineBadge | safe }}</div>
+          <div class="imo-val">{{ v.imo }}</div>
+          <div>{{ v.basin | basinDot | safe }}</div>
+          <div><button class="btn-del-row" onclick="confirmDelete('{{ v.imo }}', '{{ v.name or v.imo }}')">×</button></div>
+        </div>
+        {% endfor %}
+        <div class="no-data">— Конец данных —</div>
+      {% else %}
+        <div class="loading-row">Нет данных. Добавьте IMO-коды судов.</div>
+      {% endif %}
+    </div>
+
+    <!-- Add vessel row -->
+    <div class="add-row">
+      <input class="add-inp" type="text" id="add-imo-inp" placeholder="IMO (7 цифр)" maxlength="7" onkeydown="if(event.key==='Enter')addVessel()">
+      <button class="btn-add" onclick="addVessel()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M6.5 2v9M2 6.5h9" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Добавить судно
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- Delete popup -->
+<div class="overlay" id="overlay" onclick="bgClick(event)">
+  <div class="popup">
+    <button class="popup-x" onclick="closePopup()">×</button>
+    <div class="popup-icon-wrap">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14" stroke="#d93025" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2>Подтверждение удаления</h2>
+    <p id="popup-msg">Это действие <strong>необратимо</strong>. Выбранные суда будут удалены из системы без возможности восстановления.</p>
+    <div class="popup-lbl">Введите «Удалить» для подтверждения</div>
+    <input class="popup-inp" id="confirm-inp" type="text" placeholder="Введите здесь..." autocomplete="off" oninput="checkWord(this)">
+    <div class="popup-ok" id="popup-ok">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <circle cx="6.5" cy="6.5" r="5.5" stroke="#17a262" stroke-width="1.2"/>
+        <path d="M4.5 6.5 6 8l3-3" stroke="#17a262" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Слово подтверждено
+    </div>
+    <div class="popup-spacer" id="popup-spacer"></div>
+    <div class="popup-actions">
+      <button class="btn-cancel" onclick="closePopup()">Отмена</button>
+      <button class="btn-do-delete" id="btn-do-delete" onclick="executeDelete()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 4h10M5 4V3a1 1 0 0 1 2 0v1M5.5 7v3M8.5 7v3M3.5 4 4 11.5A1 1 0 0 0 5 12.5h4a1 1 0 0 0 1-.9L10.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Удалить безвозвратно
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── State ──────────────────────────────────────────────────────────────────
+let vessels = {{ vessels | tojson }};
+let deleteTarget = null; // null = bulk, string = single IMO
+let activeBasinFilter = null;
+
+// ─── Clock ──────────────────────────────────────────────────────────────────
+(function tick(){
+  const n=new Date(), p=x=>String(x).padStart(2,'0');
+  document.getElementById('clock').textContent=
+    `${p(n.getDate())}.${p(n.getMonth()+1)}.${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}`;
+  setTimeout(tick,15000);
+})();
+
+// ─── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(type?' '+type:'');
+  void t.offsetWidth; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ─── Basin color class ──────────────────────────────────────────────────────
+function basinClass(basin){
+  if(!basin) return 'unknown';
+  const b=basin.toLowerCase();
+  if(b.includes('дв без')) return 'dv-norf';
+  if(b.includes('дв каботаж')) return 'dv-kab';
+  if(b.includes('дв')) return 'dv';
+  if(b.includes('балтика каботаж') || b.includes('балт') && b.includes('каботаж')) return 'blt-kab';
+  if(b.includes('балт')) return 'blt';
+  if(b.includes('новор')) return 'nvr';
+  if(b.includes('транзит')) return 'transit';
+  return 'unknown';
+}
+
+function lineBadgeClass(line){
+  if(!line) return 'badge-default';
+  const l=line.toLowerCase();
+  if(l.includes('транзит')) return 'badge-transit';
+  if(l.includes('fesco')) return 'badge-fesco';
+  if(l.includes('регул')) return 'badge-reg';
+  return 'badge-default';
+}
+
+// ─── Render table ────────────────────────────────────────────────────────────
+function renderTable(list){
+  const body=document.getElementById('tbl-body');
+  if(!list || !list.length){
+    body.innerHTML='<div class="loading-row">Нет данных. Добавьте IMO-коды судов.</div>';
+    return;
+  }
+  let html='';
+  for(const v of list){
+    const bc=basinClass(v.basin||'');
+    const lc=lineBadgeClass(v.line||'');
+    const lineTxt=v.line||'—';
+    html+=`
+    <div class="tbl-row" data-imo="${v.imo}" data-basin="${v.basin||''}">
+      <div class="ship-name">${escHtml(v.name||v.imo)}</div>
+      <div><span class="badge ${lc}">• ${escHtml(lineTxt)}</span></div>
+      <div class="imo-val">${v.imo}</div>
+      <div><span class="basin-dot ${bc}"> ${escHtml(v.basin||'—')}</span></div>
+      <div><button class="btn-del-row" onclick="confirmDelete('${v.imo}','${escAttr(v.name||v.imo)}')">×</button></div>
+    </div>`;
+  }
+  html+='<div class="no-data">— Конец данных —</div>';
+  body.innerHTML=html;
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s){ return String(s).replace(/'/g,"\\'"); }
+
+// ─── Filter ──────────────────────────────────────────────────────────────────
+function filterBasin(basin){
+  const cards=document.querySelectorAll('.stat-card');
+  if(activeBasinFilter===basin){
+    activeBasinFilter=null;
+    cards.forEach(c=>c.classList.remove('active'));
+    renderFiltered();
+    return;
+  }
+  activeBasinFilter=basin;
+  cards.forEach(c=>{
+    c.classList.toggle('active',c.dataset.basin===basin);
+  });
+  renderFiltered();
+}
+
+function applySearch(){
+  activeBasinFilter=null;
+  document.querySelectorAll('.stat-card').forEach(c=>c.classList.remove('active'));
+  renderFiltered();
+}
+
+function renderFiltered(){
+  const q=(document.getElementById('search-inp').value||'').toLowerCase().trim();
+  let list=vessels;
+  if(activeBasinFilter) list=list.filter(v=>(v.basin||'')=== activeBasinFilter);
+  if(q) list=list.filter(v=>(v.imo||'').includes(q)||(v.name||'').toLowerCase().includes(q)||(v.line||'').toLowerCase().includes(q));
+  renderTable(list);
+}
+
+// ─── Add vessel ──────────────────────────────────────────────────────────────
+async function addVessel(){
+  const inp=document.getElementById('add-imo-inp');
+  const imo=inp.value.trim();
+  if(!/^\d{7}$/.test(imo)){ showToast('IMO должен содержать ровно 7 цифр','error'); inp.focus(); return; }
+  inp.disabled=true;
+  try{
+    const r=await fetch('/api/vessels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imo})});
+    const d=await r.json();
+    if(!r.ok){ showToast(d.detail||'Ошибка добавления','error'); return; }
+    showToast(`IMO ${imo} добавлен. Данные загружаются...`,'success');
+    inp.value='';
+    await reloadVessels();
+  }catch(e){ showToast('Ошибка соединения','error'); }
+  finally{ inp.disabled=false; inp.focus(); }
+}
+
+// ─── Import TXT ──────────────────────────────────────────────────────────────
+document.getElementById('f-import').addEventListener('change', async function(){
+  if(!this.files[0]) return;
+  const fd=new FormData(); fd.append('file',this.files[0]);
+  this.value='';
+  showToast('Импорт файла...');
+  try{
+    const r=await fetch('/api/vessels/import',{method:'POST',body:fd});
+    const d=await r.json();
+    if(!r.ok){ showToast(d.detail||'Ошибка импорта','error'); return; }
+    showToast(`Добавлено: ${d.added}, пропущено: ${d.skipped}`,'success');
+    await reloadVessels();
+  }catch(e){ showToast('Ошибка соединения','error'); }
+});
+
+// ─── Delete by TXT ───────────────────────────────────────────────────────────
+document.getElementById('f-delete').addEventListener('change', async function(){
+  if(!this.files[0]) return;
+  const fd=new FormData(); fd.append('file',this.files[0]);
+  const fname=this.files[0].name;
+  this.value='';
+  // store file for popup confirm
+  window._pendingDeleteFile=fd;
+  document.getElementById('popup-msg').innerHTML=`Удалить суда из файла <strong>${fname}</strong>? Это действие необратимо.`;
+  openDeletePopup('__file__');
+});
+
+// ─── Refresh all ─────────────────────────────────────────────────────────────
+async function doRefreshAll(){
+  const btn=document.getElementById('btn-refresh');
+  const ico=document.getElementById('ico-refresh');
+  btn.disabled=true; ico.classList.add('spin');
+  showToast('Обновление запущено...');
+  try{
+    const r=await fetch('/api/refresh',{method:'POST'});
+    if(r.ok){
+      showToast('Обновление запущено в фоне','success');
+      setTimeout(reloadVessels, 5000);
+    }
+  }catch(e){ showToast('Ошибка','error'); }
+  finally{
+    setTimeout(()=>{ btn.disabled=false; ico.classList.remove('spin'); },2000);
+  }
+}
+
+// ─── Export XLS ──────────────────────────────────────────────────────────────
+function exportXls(){ window.location.href='/api/export/xls'; }
+
+// ─── Logout ──────────────────────────────────────────────────────────────────
+async function doLogout(){
+  await fetch('/api/logout',{method:'POST'});
+  window.location.href='/';
+}
+
+// ─── Delete confirm popup ────────────────────────────────────────────────────
+function confirmDelete(imo, name){
+  deleteTarget=imo;
+  document.getElementById('popup-msg').innerHTML=`Удалить судно <strong>${escHtml(name)}</strong> (IMO: ${imo})? Действие <strong>необратимо</strong>.`;
+  openDeletePopup(imo);
+}
+
+function openDeletePopup(target){
+  deleteTarget=target;
+  const inp=document.getElementById('confirm-inp');
+  inp.value=''; inp.classList.remove('valid');
+  document.getElementById('popup-ok').classList.remove('show');
+  document.getElementById('popup-spacer').style.display='';
+  document.getElementById('btn-do-delete').classList.remove('on');
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>inp.focus(),260);
+}
+
+function closePopup(){ document.getElementById('overlay').classList.remove('open'); window._pendingDeleteFile=null; }
+function bgClick(e){ if(e.target.id==='overlay') closePopup(); }
+
+function checkWord(el){
+  const ok=el.value.trim()==='Удалить';
+  el.classList.toggle('valid',ok);
+  document.getElementById('popup-ok').classList.toggle('show',ok);
+  document.getElementById('popup-spacer').style.display=ok?'none':'';
+  document.getElementById('btn-do-delete').classList.toggle('on',ok);
+}
+
+async function executeDelete(){
+  closePopup();
+  try{
+    let r;
+    if(deleteTarget==='__file__' && window._pendingDeleteFile){
+      r=await fetch('/api/vessels/delete-by-file',{method:'POST',body:window._pendingDeleteFile});
+      window._pendingDeleteFile=null;
+    } else if(deleteTarget==='__bulk__' || deleteTarget===null){
+      // Delete all visible
+      const visibleImos=Array.from(document.querySelectorAll('.tbl-row[data-imo]')).map(r=>r.dataset.imo);
+      r=await fetch('/api/vessels/delete-bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imos:visibleImos})});
+    } else {
+      r=await fetch(`/api/vessels/${deleteTarget}`,{method:'DELETE'});
+    }
+    const d=await r.json();
+    if(r.ok){ showToast('Удалено успешно','success'); await reloadVessels(); }
+    else showToast(d.detail||'Ошибка удаления','error');
+  }catch(e){ showToast('Ошибка соединения','error'); }
+  deleteTarget=null;
+}
+
+// ─── Reload data ─────────────────────────────────────────────────────────────
+async function reloadVessels(){
+  try{
+    const r=await fetch('/api/vessels');
+    if(r.ok){
+      vessels=await r.json();
+      renderFiltered();
+      updateStats();
+    }
+  }catch(e){}
+}
+
+function updateStats(){
+  const counts={};
+  vessels.forEach(v=>{ const b=v.basin||'Неизвестно'; counts[b]=(counts[b]||0)+1; });
+  const total=vessels.length||1;
+  const grid=document.getElementById('stats-grid');
+  // Rebuild stats cards from data
+  const basins=['ДВ','ДВ каботаж','ДВ без РФ','Балтийский','Балтика каботаж','Новороссийск','Транзит','Неизвестно'];
+  let html='';
+  for(const basin of basins){
+    const c=counts[basin]||0;
+    if(c===0) continue;
+    const pct=Math.round(c/total*100);
+    html+=`<div class="stat-card" onclick="filterBasin('${basin}')" data-basin="${basin}">
+      <div class="stat-num">${c}</div>
+      <div class="stat-lbl">${basin}</div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+
+// Auto-reload every 30s
+setInterval(reloadVessels, 30000);
+</script>
+</body>
+</html>

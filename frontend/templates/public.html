@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru" style="color-scheme: light only;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>ЛогоперРадар — Мониторинг флота</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light only;
+    --bg:            #eef0f4;
+    --surface:       #ffffff;
+    --surface2:      #f5f6f8;
+    --border:        #e2e5ea;
+    --border2:       #cbd0d8;
+    --accent:        #1d6ff0;
+    --accent-bg:     #e8f0fe;
+    --green:         #17a262;
+    --green-bg:      #e8f6ef;
+    --green-border:  #b0dfc6;
+    --danger:        #d93025;
+    --danger-bg:     #fdf0ef;
+    --danger-border: #f5c5c2;
+    --text:          #111827;
+    --text-mid:      #6b7280;
+    --text-dim:      #b0b8c4;
+    --header:        #0f1c33;
+    --radius:        10px;
+    --radius-lg:     14px;
+    --shadow-xs:     0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm:     0 2px 8px rgba(0,0,0,.08);
+    --shadow-lg:     0 20px 48px rgba(0,0,0,.15), 0 4px 14px rgba(0,0,0,.07);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, input, button, select, textarea {
+    color-scheme: light only; background-color: initial; color: initial;
+  }
+  body {
+    background: var(--bg) !important; color: var(--text) !important;
+    font-family: 'Inter', sans-serif; min-height: 100vh;
+  }
+
+  /* ══ HEADER ══ */
+  header {
+    width: 100%; background: var(--header) !important;
+    padding: 0 40px; height: 66px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,.22);
+  }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(140deg,#2d8cf0,#1350b4);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-title { font-size: 17px; font-weight: 700; color: #fff !important; letter-spacing: -.3px; line-height: 1.15; }
+  .logo-sub { font-size: 11px; font-weight: 400; color: rgba(255,255,255,.4) !important; font-family: 'JetBrains Mono', monospace; letter-spacing: .3px; display: block; }
+  .header-right { display: flex; align-items: center; gap: 18px; }
+  .hdr-divider { width: 1px; height: 26px; background: rgba(255,255,255,.12); flex-shrink: 0; }
+  .live-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,.35) !important; letter-spacing: .5px; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+  .hdr-time .hdr-date { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: #5aaff5 !important; letter-spacing: .4px; }
+  .hdr-time .hdr-label { font-size: 10px; color: rgba(255,255,255,.35) !important; margin-top: 1px; }
+
+  .btn-login-hdr {
+    display: flex; align-items: center; gap: 7px; padding: 7px 16px;
+    background: rgba(29,111,240,.18) !important; border: 1px solid rgba(93,163,255,.35);
+    border-radius: var(--radius); color: #7ec8ff !important;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .18s;
+  }
+  .btn-login-hdr:hover { background: rgba(29,111,240,.30) !important; border-color: rgba(93,163,255,.6); color: #b8dfff !important; }
+
+  /* ══ MAIN ══ */
+  main { padding: 30px 40px; max-width: 1200px; margin: 0 auto; }
+
+  /* STAT CARDS */
+  .stats-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface) !important; border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 18px 16px 14px;
+    box-shadow: var(--shadow-xs); position: relative; overflow: hidden;
+  }
+  .stat-card::after {
+    content:''; position:absolute; bottom:0; left:14px; right:14px;
+    height:2px; background:var(--accent); border-radius:2px 2px 0 0; opacity:.3;
+  }
+  .stat-num { font-size: 36px; font-weight: 700; color: var(--accent) !important; line-height: 1; letter-spacing: -1.5px; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .stat-lbl { font-size: 11px; font-weight: 500; color: var(--text-mid) !important; margin-bottom: 10px; }
+  .stat-bar-track { height: 3px; border-radius: 99px; background: var(--border); overflow: hidden; }
+  .stat-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), #5aaff5); }
+
+  /* HERO */
+  .hero {
+    background: var(--surface) !important; border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 40px 48px;
+    box-shadow: var(--shadow-sm); text-align: center; margin-bottom: 24px;
+  }
+  .hero-title { font-size: 26px; font-weight: 700; color: var(--text) !important; margin-bottom: 10px; letter-spacing: -.5px; }
+  .hero-sub { font-size: 15px; color: var(--text-mid) !important; margin-bottom: 28px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+  .hero-update { font-size: 12px; color: var(--text-dim) !important; font-family: 'JetBrains Mono', monospace; margin-bottom: 28px; }
+  .hero-update span { color: var(--accent) !important; }
+
+  /* LOGIN MODAL */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+    z-index: 200; opacity: 0; pointer-events: none; transition: opacity .22s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface) !important; border-radius: var(--radius-lg);
+    padding: 36px 40px; width: 380px; box-shadow: var(--shadow-lg);
+    transform: translateY(16px) scale(.97); transition: transform .22s, opacity .22s; opacity: 0;
+  }
+  .overlay.open .modal { transform: none; opacity: 1; }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--text) !important; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--text-mid) !important; margin-bottom: 24px; }
+  .form-lbl { font-size: 12px; font-weight: 600; color: var(--text-mid) !important; margin-bottom: 6px; letter-spacing: .3px; text-transform: uppercase; }
+  .form-inp {
+    width: 100%; padding: 11px 14px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface2) !important; color: var(--text) !important;
+    font-family: 'Inter', sans-serif; outline: none; transition: border-color .18s, box-shadow .18s;
+  }
+  .form-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,111,240,.12); }
+  .form-inp.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(217,48,37,.1); }
+  .form-error { font-size: 12px; color: var(--danger) !important; margin-top: 6px; min-height: 16px; }
+  .btn-submit {
+    width: 100%; margin-top: 20px; padding: 12px;
+    background: var(--accent) !important; color: #fff !important;
+    border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer; transition: background .18s, transform .1s;
+  }
+  .btn-submit:hover { background: #1558c8 !important; }
+  .btn-submit:active { transform: scale(.98); }
+  .modal-x {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; color: var(--text-dim) !important;
+    font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
+  }
+  .modal-x:hover { color: var(--text) !important; }
+  .modal-wrap { position: relative; }
+
+  /* FEATURE CARDS */
+  .features { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 24px; }
+  .feat-card {
+    background: var(--surface) !important; border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 24px 22px; box-shadow: var(--shadow-xs);
+  }
+  .feat-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-bg); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .feat-title { font-size: 14px; font-weight: 600; color: var(--text) !important; margin-bottom: 6px; }
+  .feat-desc { font-size: 13px; color: var(--text-mid) !important; line-height: 1.55; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <polygon points="10,2 18,7 18,13 10,18 2,13 2,7" stroke="white" stroke-width="1.5" fill="none"/>
+        <circle cx="10" cy="10" r="2.5" fill="white"/>
+        <line x1="10" y1="2" x2="10" y2="7" stroke="white" stroke-width="1.2"/>
+        <line x1="10" y1="13" x2="10" y2="18" stroke="white" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-title">ЛогоперРадар</div>
+      <span class="logo-sub">FLEET TRACKING SYSTEM</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+    <div class="hdr-divider"></div>
+    <div class="hdr-time">
+      <div class="hdr-date" id="clock">—</div>
+      <div class="hdr-label">последнее обновление</div>
+    </div>
+    <div class="hdr-divider"></div>
+    <button class="btn-login-hdr" onclick="openLogin()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M2 12.5c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      Войти
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- Stats -->
+  <div class="stats-grid">
+    {% for s in stats %}
+    {% if s.count > 0 %}
+    <div class="stat-card">
+      <div class="stat-num">{{ s.count }}</div>
+      <div class="stat-lbl">{{ s.basin }}</div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:{{ s.pct }}%"></div></div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-title">Система мониторинга контейнерного флота</div>
+    <div class="hero-sub">Отслеживание местоположения судов по IMO-кодам с автоматическим определением бассейна</div>
+    <div class="hero-update">Последнее обновление данных: <span>{{ last_update }}</span></div>
+    <button class="btn-login-hdr" style="display:inline-flex;margin:0 auto;" onclick="openLogin()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M9 7H5M7 5l2 2-2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Войти в панель управления
+    </button>
+  </div>
+
+  <!-- Features -->
+  <div class="features">
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="7" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M10 6v4l2.5 2.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">Автообновление каждые 3 дня</div>
+      <div class="feat-desc">Система автоматически обновляет данные о местоположении флота каждые 72 часа без ручного вмешательства</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M3 10a7 7 0 1 0 14 0A7 7 0 0 0 3 10" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M10 3c0 0-3 3-3 7s3 7 3 7M10 3c0 0 3 3 3 7s-3 7-3 7M3 10h14" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">Определение бассейна</div>
+      <div class="feat-desc">По расписанию заходов автоматически определяется: ДВ, Балтийский, Новороссийск, каботаж или транзит</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="3" y="4" width="14" height="12" rx="2" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M3 8h14M7 4v4M13 4v4" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">Экспорт в Excel</div>
+      <div class="feat-desc">Выгрузка полного списка флота с данными о бассейнах и линиях в формате XLSX одним кликом</div>
+    </div>
+  </div>
+</main>
+
+<!-- Login overlay -->
+<div class="overlay" id="overlay" onclick="bgClick(event)">
+  <div class="modal-wrap">
+    <div class="modal" id="modal">
+      <button class="modal-x" onclick="closeLogin()">×</button>
+      <div class="modal-title">Вход в панель</div>
+      <div class="modal-sub">Введите пароль администратора для доступа к управлению флотом</div>
+      <div class="form-lbl">Пароль</div>
+      <input class="form-inp" type="password" id="pwd-inp" placeholder="Введите пароль..." autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="form-error" id="form-err"></div>
+      <button class="btn-submit" id="btn-submit" onclick="doLogin()">Войти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Clock
+  (function tick(){
+    const n=new Date();
+    const p=x=>String(x).padStart(2,'0');
+    document.getElementById('clock').textContent=`${p(n.getDate())}.${p(n.getMonth()+1)}.${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}`;
+    setTimeout(tick,15000);
+  })();
+
+  function openLogin(){
+    document.getElementById('overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('pwd-inp').focus(),240);
+  }
+  function closeLogin(){ document.getElementById('overlay').classList.remove('open'); }
+  function bgClick(e){ if(e.target===document.getElementById('overlay')) closeLogin(); }
+
+  async function doLogin(){
+    const pwd = document.getElementById('pwd-inp').value;
+    const errEl = document.getElementById('form-err');
+    const btn = document.getElementById('btn-submit');
+    const inp = document.getElementById('pwd-inp');
+    errEl.textContent='';
+    inp.classList.remove('error');
+    if(!pwd){ inp.classList.add('error'); errEl.textContent='Введите пароль'; return; }
+    btn.textContent='Проверяем...'; btn.disabled=true;
+    try {
+      const r = await fetch('/api/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({password: pwd})
+      });
+      if(r.ok){ window.location.href='/admin'; return; }
+      const d = await r.json();
+      inp.classList.add('error');
+      errEl.textContent = d.detail || 'Неверный пароль';
+    } catch(e){
+      errEl.textContent='Ошибка соединения';
+    }
+    btn.textContent='Войти'; btn.disabled=false;
+  }
+
+  // Auto-open login if ?login=1
+  if(new URLSearchParams(location.search).get('login')==='1') openLogin();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+[Unit]
+Description=ЛогоперРадар Fleet Tracking System
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/logoper_radar/backend
+Environment="ADMIN_PASSWORD=logoper2024"
+Environment="SESSION_SECRET=CHANGE_ME_TO_RANDOM_32_CHARS"
+ExecStart=/opt/logoper_radar/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
